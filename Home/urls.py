@@ -20,6 +20,6 @@ from ISayLight import views as ISayLight_views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^register-online$', ISayLight_views.register_online, name="get_online"),
-    url(r'^offline$', ISayLight_views.device_offline, name="off_line"),
+    url(r'^light$', ISayLight_views.light, name="light"),
 
 ]

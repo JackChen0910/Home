@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('*/30 * * * *', 'ISayLight.cron.device_offline')
+    ('*/5 * * * *', 'ISayLight.cron.device_offline')
 ]
 
 MIDDLEWARE = [
