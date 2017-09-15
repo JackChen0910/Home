@@ -15,7 +15,7 @@ def register_online(request):
         try:
             de_id = json.loads(request.body)["id"]
             if de_id is None:
-                response = {"message": "缺少参数",
+                response = {"message": u"缺少参数",
                             "status": 300,
                             }
                 return HttpResponse(json.dumps(response), content_type="application/json")
@@ -33,17 +33,17 @@ def register_online(request):
                                 }
                     return HttpResponse(json.dumps(response), content_type="application/json")
 
-                response = {"message": "未找到设备",
+                response = {"message": u"未找到设备",
                             "status": 400,
                             }
                 return HttpResponse(json.dumps(response), content_type="application/json")
         except MultiValueDictKeyError:
-            response = {"message": "缺少参数",
+            response = {"message": u"缺少参数",
                         "status": 300,
                         }
             return HttpResponse(json.dumps(response), content_type="application/json")
     else:
-        response = {"message": "只允许POST方法",
+        response = {"message": u"只允许POST方法",
                     "status": 500,
                     }
         return HttpResponse(json.dumps(response), content_type="application/json")
@@ -52,8 +52,18 @@ def register_online(request):
 def light(request):
     if request.method == "POST":
         try:
-            operation = json.loads(request.body)["operation"]
-            de_id = json.loads(request.body)["id"]
+            j = json.loads(request.body)
+            operation = j["operation"]
+            de_id = j["id"]
+            server_ip = None
+            if operation == "ip":
+                try:
+                    server_ip = j["server_ip"]
+                except KeyError:
+                    response = {"message": "缺少参数",
+                                "status": 300,
+                                }
+                    return HttpResponse(json.dumps(response), content_type="application/json")
             if operation is None or de_id is None:
                 response = {"message": "缺少参数",
                             "status": 300,
@@ -61,7 +71,7 @@ def light(request):
                 return HttpResponse(json.dumps(response), content_type="application/json")
             else:
                 for d in models.Device.objects.filter(device_id=de_id):
-                    if d.sta == "1" and read_nodemcu(d.ip, operation) == 200:
+                    if d.sta == "1" and read_nodemcu(d.ip, operation, server_ip) == 200:
                         response = {"message": "ok",
                                     "status": 200,
                                     }
@@ -87,22 +97,24 @@ def light(request):
             response = {"message": "未找到设备",
                         "status": 400,
                         }
-            return HttpResponse(json.dumps(response), content_type="application/json")
+            return HttpResponse(json.dumps(response, ensure_ascii=False), content_type="application/json")
         except MultiValueDictKeyError:
             response = {"message": "缺少参数",
                         "status": 300,
                         }
-            return HttpResponse(json.dumps(response), content_type="application/json")
+            return HttpResponse(json.dumps(response, ), content_type="application/json")
 
     else:
-        response = {"message": "只允许POST方法",
+        response = {"message": u"只允许POST方法",
                     "status": 500,
                     }
-        return HttpResponse(json.dumps(response), content_type="application/json")
+        return HttpResponse(json.dumps(response, encoding="utf-8"), content_type="application/json",charset="utf-8")
 
 
-def read_nodemcu(ip, operation):
+def read_nodemcu(ip, operation, server_ip):
     data = {'operation': operation}
+    if server_ip is not None:
+        data["ip"] = server_ip
     import socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     port = 80

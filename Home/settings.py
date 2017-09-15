@@ -112,6 +112,8 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Shanghai'
 
+DEFAULT_CHARSET = "UTF-8"
+
 USE_I18N = True
 
 USE_L10N = True
